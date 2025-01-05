@@ -48,20 +48,30 @@ for i in "${!filtered_disks[@]}"; do
     echo "$((i + 1)). /dev/${filtered_disks[$i]} (${filtered_sizes[$i]}G)"
 done
 
+echo "即将开始格式化以上磁盘。请等待 10 秒钟..."
+
+# 等待 10 秒钟，用户可以选择是否继续
+sleep 10
+
 # 自动格式化符合条件的磁盘（包括挂载的磁盘）
 for i in "${!filtered_disks[@]}"; do
     disk="${filtered_disks[$i]}"
     disk_size="${filtered_sizes[$i]}"
     echo "正在格式化 /dev/$disk 为 $default_fstype 类型（大小：${disk_size}GB）..."
 
-    # 检查磁盘是否已经挂载
+    # 检查磁盘是否已挂载
     mountpoint=$(lsblk -o MOUNTPOINT -n "/dev/$disk")
     if [ ! -z "$mountpoint" ]; then
-        echo "/dev/$disk 已经挂载，尝试卸载..."
+        echo "/dev/$disk 已挂载，正在取消挂载..."
         umount "/dev/$disk"
         if [ $? -ne 0 ]; then
-            echo "无法卸载 /dev/$disk，请检查是否有进程正在使用该磁盘。"
-            continue
+            echo "无法卸载 /dev/$disk，尝试强制卸载..."
+            fuser -km "/dev/$disk"  # 强制停止所有占用该磁盘的进程
+            umount "/dev/$disk"     # 再次尝试卸载
+            if [ $? -ne 0 ]; then
+                echo "仍然无法卸载 /dev/$disk，跳过该磁盘的格式化。"
+                continue
+            fi
         fi
     fi
 
