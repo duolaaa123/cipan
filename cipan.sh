@@ -48,22 +48,18 @@ while true; do
         echo "$((i + 1)). ${filtered_disks[$i]} (${filtered_sizes[$i]}G)"
     done
 
-    echo "按 'q' 键退出脚本。"
-
     # 自动格式化符合条件的磁盘
     for i in "${!filtered_disks[@]}"; do
         echo "发现符合条件的磁盘：/dev/${filtered_disks[$i]} (${filtered_sizes[$i]}G)"
-        read -p "是否立即格式化 /dev/${filtered_disks[$i]} 为 $default_fstype 类型？(y/N): " auto_confirm
-        if [[ "$auto_confirm" =~ ^[Yy]$ ]]; then
-            echo "正在格式化 /dev/${filtered_disks[$i]} 为 $default_fstype 类型..."
-            umount "/dev/${filtered_disks[$i]}" 2>/dev/null
-            mkfs -t "$default_fstype" "/dev/${filtered_disks[$i]}"
+        # 自动格式化磁盘，无需用户确认
+        echo "正在格式化 /dev/${filtered_disks[$i]} 为 $default_fstype 类型..."
+        umount "/dev/${filtered_disks[$i]}" 2>/dev/null
+        mkfs -t "$default_fstype" "/dev/${filtered_disks[$i]}"
 
-            if [ $? -eq 0 ]; then
-                echo "磁盘 /dev/${filtered_disks[$i]} 已成功格式化为 $default_fstype 类型！"
-            else
-                echo "格式化磁盘 /dev/${filtered_disks[$i]} 失败。"
-            fi
+        if [ $? -eq 0 ]; then
+            echo "磁盘 /dev/${filtered_disks[$i]} 已成功格式化为 $default_fstype 类型！"
+        else
+            echo "格式化磁盘 /dev/${filtered_disks[$i]} 失败。"
         fi
     done
 
