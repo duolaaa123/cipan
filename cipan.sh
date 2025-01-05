@@ -23,7 +23,7 @@ fi
 
 # 提取磁盘信息
 disk_list=($(echo "$disks" | awk '{print $1}'))
-disk_sizes=($(echo "$disks" | awk '{print $2}' | sed 's/G//'))
+disk_sizes=($(echo "$disks" | awk '{print $2}' | sed 's/[^0-9]*//g'))  # 只保留数字，去掉单位（如G）
 disk_mounts=($(echo "$disks" | awk '{print $4}'))
 
 # 过滤出大于阈值的磁盘（包括挂载的磁盘）
@@ -45,7 +45,7 @@ fi
 
 echo "以下磁盘符合自动格式化条件："
 for i in "${!filtered_disks[@]}"; do
-    echo "$((i + 1)). /dev/${filtered_disks[$i]} (${filtered_sizes[$i]}G)"
+    echo "$((i + 1)). /dev/${filtered_disks[$i]} (${filtered_sizes[$i]}GB)"
 done
 
 echo "即将开始格式化以上磁盘。请等待 10 秒钟..."
@@ -75,8 +75,8 @@ for i in "${!filtered_disks[@]}"; do
         fi
     fi
 
-    # 执行格式化
-    mkfs -t "$default_fstype" "/dev/$disk"
+    # 执行格式化，使用 -f 强制覆盖
+    mkfs -t "$default_fstype" -f "/dev/$disk"
     
     if [ $? -eq 0 ]; then
         echo "磁盘 /dev/$disk 已成功格式化为 $default_fstype 类型！"
