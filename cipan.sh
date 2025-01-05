@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # 检查是否以root用户运行
@@ -31,10 +32,11 @@ filtered_disks=()
 filtered_sizes=()
 
 for i in "${!disk_list[@]}"; do
-    if (( ${disk_sizes[$i]} > threshold_size )); then
-        # 只处理大于150GB的磁盘
+    # 获取数字部分并进行大小比较
+    disk_size=${disk_sizes[$i]}
+    if (( disk_size > threshold_size )); then
         filtered_disks+=("${disk_list[$i]}")
-        filtered_sizes+=("${disk_sizes[$i]}")
+        filtered_sizes+=("${disk_size}")
     fi
 done
 
