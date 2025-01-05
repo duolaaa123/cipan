@@ -53,9 +53,21 @@ for i in "${!filtered_disks[@]}"; do
     disk="${filtered_disks[$i]}"
     disk_size="${filtered_sizes[$i]}"
     echo "正在格式化 /dev/$disk 为 $default_fstype 类型（大小：${disk_size}GB）..."
-    umount "/dev/$disk" 2>/dev/null # 尝试卸载磁盘，如果已挂载
-    mkfs -t "$default_fstype" "/dev/$disk" # 执行格式化
 
+    # 检查磁盘是否已经挂载
+    mountpoint=$(lsblk -o MOUNTPOINT -n "/dev/$disk")
+    if [ ! -z "$mountpoint" ]; then
+        echo "/dev/$disk 已经挂载，尝试卸载..."
+        umount "/dev/$disk"
+        if [ $? -ne 0 ]; then
+            echo "无法卸载 /dev/$disk，请检查是否有进程正在使用该磁盘。"
+            continue
+        fi
+    fi
+
+    # 执行格式化
+    mkfs -t "$default_fstype" "/dev/$disk"
+    
     if [ $? -eq 0 ]; then
         echo "磁盘 /dev/$disk 已成功格式化为 $default_fstype 类型！"
     else
