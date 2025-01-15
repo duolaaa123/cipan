@@ -86,6 +86,10 @@ install_scripts() {
     curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/disk/mount.sh | bash
     sleep 5
     bash <(curl -sSL https://1142.s.kuaicdn.cn:11428/script-client-t241224/master/raw/branch/main/apps/ern/install.sh)
+    sleep 5
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/smt/ERN/inspect/t241201/smt_r_id.sh | bash
+    sleep 30
+    
     echo "水蜜桃r上机任务完成！"
 }
 
