@@ -104,7 +104,13 @@ while true; do
     echo "3. 检查业务脚本"
     echo "q. 退出脚本"
     echo "=========================="
-    read -p "请选择一个选项: " choice
+    read -rp "请选择一个选项: " choice
+
+    # 检查输入是否合法
+    if [[ -z "$choice" ]]; then
+        echo "输入不能为空，请重新输入。"
+        continue
+    fi
 
     case $choice in
         1)
