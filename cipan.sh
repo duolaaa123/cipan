@@ -121,7 +121,8 @@ while true; do
             break
             ;;
         *)
-            echo "无效的选项，请重试。"
+            echo "无效的选项，请输入 1, 2, 3 或 q。"
             ;;
     esac
+    echo
 done
