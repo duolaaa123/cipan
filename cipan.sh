@@ -81,7 +81,7 @@ auto_format_disks() {
 # 水蜜桃r上机功能
 install_scripts() {
     echo "开始执行水蜜桃r上机任务..."
-    curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250111/master/raw/branch/main/boot/install.sh | bash && exec bash
+    curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250111/master/raw/branch/main/boot/install.sh | bash
     sleep 5
     curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/disk/mount.sh | bash
     sleep 5
