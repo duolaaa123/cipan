@@ -106,7 +106,7 @@ while true; do
     echo "=========================="
     read -rp "请选择一个选项: " choice
 
-    # 检查输入是否合法
+    # 修复输入为空或无效选项时的逻辑
     if [[ -z "$choice" ]]; then
         echo "输入不能为空，请重新输入。"
         continue
@@ -122,7 +122,7 @@ while true; do
         3)
             check_scripts
             ;;
-        q)
+        q|Q)
             echo "退出脚本。"
             break
             ;;
