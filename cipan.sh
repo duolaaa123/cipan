@@ -100,12 +100,64 @@ check_scripts() {
     echo "检查业务脚本完成！"
 }
 
+# 波罗蜜上机功能
+install_boluomi() {
+    echo "开始执行波罗蜜上机任务..."
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/client/t241128-roll/install.sh | out=0 tx=300 bash
+
+    # 修改 GRUB 配置
+    echo "正在修改 GRUB 配置..."
+    sed -i "s|^GRUB_DEFAULT='.*'|GRUB_DEFAULT=0|" /etc/default/grub
+    if [ $? -eq 0 ]; then
+        echo "GRUB 配置修改成功！"
+    else
+        echo "GRUB 配置修改失败。"
+    fi
+
+    # 更新 GRUB
+    echo "正在更新 GRUB..."
+    update-grub
+    if [ $? -eq 0 ]; then
+        echo "GRUB 更新成功！"
+    else
+        echo "GRUB 更新失败。"
+    fi
+
+    # 同步数据
+    echo "正在同步数据..."
+    sync
+    if [ $? -eq 0 ]; then
+        echo "数据同步完成！"
+    else
+        echo "数据同步失败。"
+    fi
+
+    echo "波罗蜜上机任务完成！"
+}
+
+# 检查波罗蜜功能
+check_boluomi() {
+    echo "开始检查波罗蜜任务..."
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/inspect/pop_check.sh | bash
+    echo "检查波罗蜜任务完成！"
+}
+
+# 挂盘功能
+mount_disks() {
+    echo "开始执行挂盘任务..."
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/disk/mount.sh | bash
+    echo "挂盘任务完成！"
+}
+
 # 菜单界面
 while true; do
     echo "========== 菜单 =========="
     echo "1. 自动检测并格式化磁盘"
     echo "2. 水蜜桃r上机"
     echo "3. 检查业务脚本"
+    echo "4. 波罗蜜上机"
+    echo "5. 检查波罗蜜"
+    echo "6. 挂盘"
     echo "q. 退出脚本"
     echo "=========================="
     read -rp "请选择一个选项: " choice
@@ -126,12 +178,21 @@ while true; do
         3)
             check_scripts
             ;;
+        4)
+            install_boluomi
+            ;;
+        5)
+            check_boluomi
+            ;;
+        6)
+            mount_disks
+            ;;
         q|Q)
             echo "退出脚本。"
             break
             ;;
         *)
-            echo "无效的选项，请输入 1, 2, 3 或 q。"
+            echo "无效的选项，请输入 1, 2, 3, 4, 5, 6 或 q。"
             ;;
     esac
     echo
