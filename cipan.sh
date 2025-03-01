@@ -103,7 +103,7 @@ check_scripts() {
 # 波罗蜜上机功能
 install_boluomi() {
     echo "开始执行波罗蜜上机任务..."
-    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/client/t241128-roll/install.sh | out=0 tx=300 bash
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/client/t241128-roll/install.sh | out=0 tx=400 bash
 
     # 修改 GRUB 配置
     echo "正在修改 GRUB 配置..."
