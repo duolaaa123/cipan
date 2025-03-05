@@ -102,13 +102,27 @@ check_scripts() {
 
 # 波罗蜜上机功能
 install_boluomi() {
-    echo "开始执行波罗蜜上机任务..."
-    curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash && exec bash
-    sleep 5
-    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/disk/mount.sh | bash
-    sleep 5
-    sss -p  12
-    sleep 5
+     echo "开始执行波罗蜜上机任务..."
+    
+    # 第一步：执行新curl命令
+    echo "正在执行主安装脚本..."
+    if curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash && exec bash; then
+        echo "主安装脚本执行成功！"
+    else
+        echo "主安装脚本执行失败！"
+        return 1
+    fi
+
+    # 第二步：执行sss命令
+    echo "正在执行SSS配置..."
+    if sss -p 12; then
+        echo "SSS配置执行成功！"
+    else
+        echo "SSS配置执行失败！"
+        return 1
+    fi
+
+    echo "波罗蜜上机任务完成！"
 
     # 修改 GRUB 配置
     echo "正在修改 GRUB 配置..."
@@ -160,7 +174,7 @@ while true; do
     echo "1. 自动检测并格式化磁盘"
     echo "2. 水蜜桃r上机"
     echo "3. 检查业务脚本"
-    echo "4. 波罗蜜上机"
+    echo "4. 波罗蜜上机（需要先挂盘）"
     echo "5. 检查波罗蜜"
     echo "6. 挂盘"
     echo "q. 退出脚本"
