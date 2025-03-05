@@ -129,9 +129,13 @@ install_boluomi() {
 
 # 检查波罗蜜功能
 check_boluomi() {
-    echo "开始检查波罗蜜任务..."
-    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/inspect/pop_check.sh | bash
-    echo "检查波罗蜜任务完成！"
+     echo "正在执行SSS配置..."
+    if command -v sss &> /dev/null; then
+        sss -p 11 && echo "SSS配置执行成功！" || echo "SSS配置执行失败！"
+    else
+        echo "未找到 sss 命令，请检查是否安装。"
+        return 1
+    fi
 }
 
 # 挂盘功能
