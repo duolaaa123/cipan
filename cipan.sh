@@ -103,7 +103,12 @@ check_scripts() {
 # 波罗蜜上机功能
 install_boluomi() {
     echo "开始执行波罗蜜上机任务..."
-    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/client/t241128-roll/install.sh | out=0 tx=400 bash
+    curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash && exec bash
+    sleep 5
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/disk/mount.sh | bash
+    sleep 5
+    sss -p  12
+    sleep 5
 
     # 修改 GRUB 配置
     echo "正在修改 GRUB 配置..."
@@ -138,7 +143,7 @@ install_boluomi() {
 # 检查波罗蜜功能
 check_boluomi() {
     echo "开始检查波罗蜜任务..."
-    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/inspect/pop_check.sh | bash
+    sss -p  11
     echo "检查波罗蜜任务完成！"
 }
 
