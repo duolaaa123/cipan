@@ -115,14 +115,7 @@ install_boluomi_step1() {
 }
 
 install_boluomi_step2() {
-    echo "=== 波罗蜜上机-步骤2：SSS配置 ==="
-     echo "正在执行SSS配置..."
-    if command -v sss &> /dev/null; then
-        sss -p 12 && echo "SSS配置执行成功！" || echo "SSS配置执行失败！"
-    else
-        echo "未找到 sss 命令，请检查是否安装。"
-        return 1
-    fi
+    echo "请退出脚本手动执行sss -p 12"
 }
 
 
