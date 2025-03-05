@@ -156,10 +156,13 @@ install_boluomi() {
 
 # 检查波罗蜜功能
 check_boluomi() {
-    echo "开始检查波罗蜜任务..."
-    sss -p  11
-    echo "检查波罗蜜任务完成！"
-}
+    echo "正在执行SSS配置..."
+    if sss -p  11; then
+        echo "SSS配置执行成功！"
+    else
+        echo "SSS配置执行失败！"
+        return 1
+    fi
 
 # 挂盘功能
 mount_disks() {
