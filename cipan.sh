@@ -105,7 +105,7 @@ install_boluomi_step1() {
     
     # 执行新安装命令
     echo "正在执行主安装脚本..."
-    curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash; then
+    if curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash; then
         echo "主安装脚本执行成功！"
     else
         echo "主安装脚本执行失败！"
