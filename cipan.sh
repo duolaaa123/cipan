@@ -100,7 +100,7 @@ check_scripts() {
 }
 
 # 波罗蜜上机功能（修复版）
-install_boluomi() {
+install_boluomi_step1() {
     echo "开始执行波罗蜜上机任务..."
     
     # 执行新安装命令
