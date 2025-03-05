@@ -112,20 +112,23 @@ install_boluomi() {
         return 1
     fi
 
-    # 重启Shell环境
-    exec bash
+}
 
-    # 执行SSS配置
-    echo "正在执行SSS配置..."
+install_boluomi_step2() {
+    echo "=== 波罗蜜上机-步骤2：SSS配置 ==="
     if command -v sss &> /dev/null; then
-        sss -p 12 && echo "SSS配置执行成功！" || echo "SSS配置执行失败！"
+        if sss -p 12; then
+            echo "SSS配置成功！"
+        else
+            echo "SSS配置失败！"
+            return 1
+        fi
     else
-        echo "未找到 sss 命令，请检查是否安装。"
+        echo "未找到 sss 命令，请先完成步骤1安装！"
         return 1
     fi
-
-    echo "波罗蜜上机任务完成！"
 }
+
 
 # 检查波罗蜜功能
 check_boluomi() {
@@ -147,31 +150,30 @@ mount_disks() {
 
 # 菜单界面
 while true; do
-    echo "========== 菜单 =========="
+    echo "============= 菜单 ============="
     echo "1. 自动检测并格式化磁盘"
     echo "2. 水蜜桃r上机"
     echo "3. 检查业务脚本"
-    echo "4. 波罗蜜上机"
-    echo "5. 检查波罗蜜"
-    echo "6. 挂盘"
+    echo "4. 波罗蜜上机-步骤1（主安装）"
+    echo "5. 波罗蜜上机-步骤2（SSS配置）"
+    echo "6. 检查波罗蜜"
+    echo "7. 挂盘"
     echo "q. 退出脚本"
-    echo "=========================="
+    echo "================================"
     read -rp "请选择一个选项: " choice
 
-    if [[ -z "$choice" ]]; then
-        echo "输入不能为空，请重新输入。"
-        continue
-    fi
+    [[ -z "$choice" ]] && echo "输入不能为空！" && continue
 
     case $choice in
         1) auto_format_disks ;;
         2) install_scripts ;;
         3) check_scripts ;;
-        4) install_boluomi ;;
-        5) check_boluomi ;;
-        6) mount_disks ;;
+        4) install_boluomi_step1 ;;
+        5) install_boluomi_step2 ;;
+        6) check_boluomi ;;
+        7) mount_disks ;;
         q|Q) echo "退出脚本。" && break ;;
-        *) echo "无效的选项，请输入 1, 2, 3, 4, 5, 6 或 q。" ;;
+        *) echo "无效选项，请输入 1-7 或 q" ;;
     esac
     echo
 done
