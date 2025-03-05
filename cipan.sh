@@ -89,7 +89,6 @@ install_scripts() {
     sleep 5
     curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/smt/ERN/inspect/t241201/smt_r_id.sh | bash
     sleep 30
-    
     echo "水蜜桃r上机任务完成！"
 }
 
@@ -100,25 +99,28 @@ check_scripts() {
     echo "检查业务脚本完成！"
 }
 
-# 波罗蜜上机功能（最新修改版）
+# 波罗蜜上机功能（修复版）
 install_boluomi() {
     echo "开始执行波罗蜜上机任务..."
     
     # 执行新安装命令
     echo "正在执行主安装脚本..."
-    if curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash && exec bash; then
+    if curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash; then
         echo "主安装脚本执行成功！"
     else
         echo "主安装脚本执行失败！"
         return 1
     fi
 
+    # 重启Shell环境
+    exec bash
+
     # 执行SSS配置
     echo "正在执行SSS配置..."
-    if sss -p 12; then
-        echo "SSS配置执行成功！"
+    if command -v sss &> /dev/null; then
+        sss -p 12 && echo "SSS配置执行成功！" || echo "SSS配置执行失败！"
     else
-        echo "SSS配置执行失败！"
+        echo "未找到 sss 命令，请检查是否安装。"
         return 1
     fi
 
@@ -152,38 +154,20 @@ while true; do
     echo "=========================="
     read -rp "请选择一个选项: " choice
 
-    # 修复输入为空或无效选项时的逻辑
     if [[ -z "$choice" ]]; then
         echo "输入不能为空，请重新输入。"
         continue
     fi
 
     case $choice in
-        1)
-            auto_format_disks
-            ;;
-        2)
-            install_scripts
-            ;;
-        3)
-            check_scripts
-            ;;
-        4)
-            install_boluomi
-            ;;
-        5)
-            check_boluomi
-            ;;
-        6)
-            mount_disks
-            ;;
-        q|Q)
-            echo "退出脚本。"
-            break
-            ;;
-        *)
-            echo "无效的选项，请输入 1, 2, 3, 4, 5, 6 或 q。"
-            ;;
+        1) auto_format_disks ;;
+        2) install_scripts ;;
+        3) check_scripts ;;
+        4) install_boluomi ;;
+        5) check_boluomi ;;
+        6) mount_disks ;;
+        q|Q) echo "退出脚本。" && break ;;
+        *) echo "无效的选项，请输入 1, 2, 3, 4, 5, 6 或 q。" ;;
     esac
     echo
 done
