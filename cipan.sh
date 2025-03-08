@@ -104,19 +104,33 @@ check_scripts() {
 install_boluomi() {
     echo "=== 开始执行波罗蜜上机任务 ==="
     
-    if curl -sSL https://1142.s.kuaicdn.cn:11428/store-scripts-t250217/master/raw/branch/main/boot/install.sh | bash
-    then
-        echo "主安装脚本执行成功！"
-        echo "正在更新Shell环境..."
-        exec bash
+   echo "正在修改 GRUB 配置..."
+    sed -i "s|^GRUB_DEFAULT='.*'|GRUB_DEFAULT=0|" /etc/default/grub
+    if [ $? -eq 0 ]; then
+        echo "GRUB 配置修改成功！"
     else
-        echo "安装失败！错误码：$?"
-        echo "可能原因："
-        echo "1. 网络连接问题"
-        echo "2. 脚本下载失败"
-        echo "3. 系统依赖缺失"
-        return 1
+        echo "GRUB 配置修改失败。"
     fi
+
+    # 更新 GRUB
+    echo "正在更新 GRUB..."
+    update-grub
+    if [ $? -eq 0 ]; then
+        echo "GRUB 更新成功！"
+    else
+        echo "GRUB 更新失败。"
+    fi
+
+    # 同步数据
+    echo "正在同步数据..."
+    sync
+    if [ $? -eq 0 ]; then
+        echo "数据同步完成！"
+    else
+        echo "数据同步失败。"
+    fi
+
+    echo "波罗蜜上机任务完成！"
 }
 
 # 检查波罗蜜功能
