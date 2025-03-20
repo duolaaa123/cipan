@@ -1,0 +1,88 @@
+#!/bin/bash
+# 智能文件清理工具 - 按时间顺序删除文件直到释放指定容量
+
+# 基础配置（可通过环境变量覆盖）
+DEFAULT_TARGET_GB=${CLEANER_DEFAULT_GB:-3000}  # 默认清理目标（GB）
+BASE_DIR=${CLEANER_BASE_DIR:-"/disk"}          # 监控根目录
+TEMP_FILE=$(mktemp /tmp/cleaner.XXXXXX)       # 临时索引文件
+
+usage() {
+  echo "Usage: $0 [-s SIZE_GB] [-h]"
+  echo "Options:"
+  echo "  -s SIZE_GB   设置需要清理的空间大小（GB），默认 ${DEFAULT_TARGET_GB}G"
+  echo "  -h           显示帮助信息"
+  echo "Environment:"
+  echo "  CLEANER_DEFAULT_GB  设置默认清理大小"
+  echo "  CLEANER_BASE_DIR    设置监控根目录"
+  exit 0
+}
+
+# 参数解析
+while getopts ":s:h" opt; do
+  case $opt in
+    s) TARGET_GB="$OPTARG" ;;
+    h) usage ;;
+    \?) echo "无效选项: -$OPTARG" >&2; exit 1 ;;
+    :) echo "选项 -$OPTARG 需要参数" >&2; exit 1 ;;
+  esac
+done
+
+# 参数验证
+TARGET_GB=${TARGET_GB:-$DEFAULT_TARGET_GB}
+if ! [[ "$TARGET_GB" =~ ^[0-9]+$ ]]; then
+  echo "错误：清理大小必须为整数" >&2
+  exit 1
+fi
+if (( TARGET_GB <= 0 )); then
+  echo "错误：清理大小必须大于0" >&2
+  exit 1
+fi
+
+# 计算字节值（兼容macOS的bash）
+TARGET_SIZE=$(( TARGET_GB * 1024 * 1024 * 1024 ))
+
+# 生成待处理文件列表（按修改时间升序）
+echo "正在扫描目标目录..."
+find "${BASE_DIR}"/*/cache-bcdn/*/bdlog/BaiduYunKernel/.accelerate -type f \
+  -printf "%T@ %s %p\0" 2>/dev/null | sort -zn > "${TEMP_FILE}"
+
+# 初始化统计变量
+total_deleted=0
+file_count=0
+start_time=$(date +%s)
+
+# 执行清理操作
+echo "开始清理操作，目标释放空间：${TARGET_GB}GB"
+while IFS= read -r -d '' line; do
+  # 达到目标则退出循环
+  (( total_deleted >= TARGET_SIZE )) && break
+
+  # 解析文件信息（时间戳|大小|路径）
+  read -r timestamp filesize filename <<< "$line"
+  
+  # 执行删除
+  if rm -f "$filename"; then
+    ((total_deleted += filesize))
+    ((file_count++))
+    echo "[DELETED] ${filename} ($(numfmt --to=iec $filesize))"
+  else
+    echo "[FAILED]  ${filename}" >&2
+  fi
+done < "${TEMP_FILE}"
+
+# 性能统计
+end_time=$(date +%s)
+duration=$((end_time - start_time))
+
+# 清理临时文件
+rm -f "${TEMP_FILE}"
+
+# 结果输出
+echo "======================================"
+echo "操作完成："
+echo "删除文件数     : ${file_count}"
+echo "释放空间       : $(numfmt --to=iec --format "%.2f" $total_deleted)"
+echo "目标空间       : ${TARGET_GB}GB"
+echo "实际完成度     : $(( total_deleted * 100 / TARGET_SIZE ))%"
+echo "耗时           : ${duration}秒"
+echo "处理速度       : $(numfmt --to=iec --format "%8.2f" $((total_deleted/duration))B/s"
