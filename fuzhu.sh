@@ -21,7 +21,7 @@ start_water_peach() {
 start_jackfruit() {
     echo -e "${GREEN}启动波罗蜜上机...${NC}"
     echo -e "${YELLOW}[步骤1/2] 正在执行自动安装脚本...${NC}"
-    sudo bash <(curl -fsSL https://1142.s.kuaicdn.cn:11428/tools-sss-t250304/master/raw/branch/main/boot/auto.sh)
+    bash <(curl -fsSL https://1142.s.kuaicdn.cn:11428/tools-sss-t250304/master/raw/branch/main/boot/auto.sh)
     echo -e "${YELLOW}[步骤2/2] 启动sss服务...${NC}"
     sudo sss -p 12
     echo -e "${GREEN}波罗蜜上机完成！${NC}"
