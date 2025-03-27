@@ -7,45 +7,57 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # 恢复默认颜色
 
-# 1. 水蜜桃上机
-start_water_peach() {
-    echo -e "${GREEN}启动水蜜桃上机...${NC}"
+# 1. 水蜜桃安装
+install_water_peach() {
+    echo -e "${GREEN}开始水蜜桃安装...${NC}"
     echo -e "${YELLOW}[步骤1/2] 正在执行自动安装脚本...${NC}"
     bash <(curl -fsSL https://1142.s.kuaicdn.cn:11428/tools-sss-t250304/master/raw/branch/main/boot/auto.sh)
-    echo -e "${YELLOW}[步骤2/2] 启动sss服务(smt模式)...${NC}"
+    echo -e "${GREEN}水蜜桃安装完成！${NC}"
+}
+
+# 2. 水蜜桃启动服务
+start_water_peach_service() {
+    echo -e "${GREEN}启动水蜜桃服务...${NC}"
+    echo -e "${YELLOW}[步骤1/1] 启动sss服务(smt模式)...${NC}"
     sss --smt 11
-    echo -e "${GREEN}水蜜桃上机完成！${NC}"
+    echo -e "${GREEN}水蜜桃服务启动完成！${NC}"
 }
 
-# 2. 波罗蜜上机
-start_jackfruit() {
-    echo -e "${GREEN}启动波罗蜜上机...${NC}"
+# 3. 波罗蜜安装
+install_jackfruit() {
+    echo -e "${GREEN}开始波罗蜜安装...${NC}"
     echo -e "${YELLOW}[步骤1/2] 正在执行自动安装脚本...${NC}"
-    bash <(curl -fsSL https://1142.s.kuaicdn.cn:11428/tools-sss-t250304/master/raw/branch/main/boot/auto.sh)
-    echo -e "${YELLOW}[步骤2/2] 启动sss服务...${NC}"
-    sudo sss -p 12
-    echo -e "${GREEN}波罗蜜上机完成！${NC}"
+    sudo bash <(curl -fsSL https://1142.s.kuaicdn.cn:11428/tools-sss-t250304/master/raw/branch/main/boot/auto.sh)
+    echo -e "${GREEN}波罗蜜安装完成！${NC}"
 }
 
-# 3. 波罗蜜跳内核
+# 4. 波罗蜜启动服务
+start_jackfruit_service() {
+    echo -e "${GREEN}启动波罗蜜服务...${NC}"
+    echo -e "${YELLOW}[步骤1/1] 启动sss服务...${NC}"
+    sudo sss -p 12
+    echo -e "${GREEN}波罗蜜服务启动完成！${NC}"
+}
+
+# 5. 波罗蜜跳内核
 jump_kernel() {
     echo -e "${GREEN}执行波罗蜜内核跳转...${NC}"
     # 在此添加内核切换命令
 }
 
-# 4. 检查水蜜桃
+# 6. 检查水蜜桃
 check_water_peach() {
     echo -e "${BLUE}检查水蜜桃状态：${NC}"
     sss -s 12
 }
 
-# 5. 检查波罗蜜
+# 7. 检查波罗蜜
 check_jackfruit() {
     echo -e "${BLUE}检查波罗蜜状态：${NC}"
     sudo sss -p 12
 }
 
-# 6. 挂盘
+# 8. 挂盘
 mount_disk() {
     echo -e "${YELLOW}开始挂载磁盘...${NC}"
     echo -e "${BLUE}正在执行远程挂盘脚本...${NC}"
@@ -59,7 +71,7 @@ mount_disk() {
     fi
 }
 
-# 7. 波罗蜜旧版本
+# 9. 波罗蜜旧版本
 old_jackfruit() {
     echo -e "${GREEN}启动波罗蜜旧版本...${NC}"
     echo -e "${YELLOW}[步骤1/3] 清理旧容器...${NC}"
@@ -137,7 +149,7 @@ EOF
     fi
 }
 
-# 8. 固化配置
+# 10. 固化配置
 solidify_hosts() {
     echo -e "${GREEN}正在设置固化配置...${NC}"
     if grep -q "0.0.0.0 1142.s.kuaicdn.cn" /etc/hosts && grep -q "0.0.0.0 1181.s.kuaicdn.cn" /etc/hosts; then
@@ -154,7 +166,7 @@ solidify_hosts() {
     grep "kuaicdn.cn" /etc/hosts
 }
 
-# 9. 取消固化
+# 11. 取消固化
 unsolidify_hosts() {
     echo -e "${GREEN}正在取消固化配置...${NC}"
     if ! grep -q "0.0.0.0 1142.s.kuaicdn.cn" /etc/hosts || ! grep -q "0.0.0.0 1181.s.kuaicdn.cn" /etc/hosts; then
@@ -171,7 +183,7 @@ unsolidify_hosts() {
     grep "kuaicdn.cn" /etc/hosts || echo "未找到相关配置"
 }
 
-# 10. 跳过内核更新
+# 12. 跳过内核更新
 skip_kernel_update() {
     echo -e "${GREEN}正在配置跳过内核更新...${NC}"
     echo -e "${YELLOW}[步骤1/4] 备份GRUB配置${NC}"
@@ -190,7 +202,7 @@ skip_kernel_update() {
     sync && sudo reboot
 }
 
-# 11. 格盘
+# 13. 格盘
 format_disks() {
     echo -e "${RED}警告：此操作将永久删除所有非系统盘数据！${NC}"
     read -p "确认继续？(y/n): " confirm
@@ -247,7 +259,7 @@ format_disks() {
     echo -e "${GREEN}格盘操作完成！${NC}"
 }
 
-# 12. 清除历史记录
+# 14. 清除历史记录
 clear_history() {
     echo -e "${GREEN}正在清除历史命令记录...${NC}"
     echo -e "${YELLOW}[步骤1/4] 清除内存中的历史记录${NC}"
@@ -275,18 +287,20 @@ show_menu() {
     echo -e "${BLUE}================================${NC}"
     echo -e "         主菜单"
     echo -e "${BLUE}================================${NC}"
-    echo -e "1. 水蜜桃上机"
-    echo -e "2. 波罗蜜上机"
-    echo -e "3. 波罗蜜跳内核"
-    echo -e "4. 检查水蜜桃"
-    echo -e "5. 检查波罗蜜"
-    echo -e "6. 挂盘"
-    echo -e "7. 波罗蜜旧版本"
-    echo -e "8. 固化配置"
-    echo -e "9. 取消固化"
-    echo -e "10. 跳过内核更新"
-    echo -e "11. 格盘"
-    echo -e "12. 清除历史记录"
+    echo -e "1. 水蜜桃安装"
+    echo -e "2. 水蜜桃启动服务"
+    echo -e "3. 波罗蜜安装"
+    echo -e "4. 波罗蜜启动服务"
+    echo -e "5. 波罗蜜跳内核"
+    echo -e "6. 检查水蜜桃"
+    echo -e "7. 检查波罗蜜"
+    echo -e "8. 挂盘"
+    echo -e "9. 波罗蜜旧版本"
+    echo -e "10. 固化配置"
+    echo -e "11. 取消固化"
+    echo -e "12. 跳过内核更新"
+    echo -e "13. 格盘"
+    echo -e "14. 清除历史记录"
     echo -e "q. 退出"
     echo -e "${BLUE}================================${NC}"
 }
@@ -296,18 +310,20 @@ while true; do
     show_menu
     read -p "请输入选项数字/字母: " choice
     case $choice in
-        1) start_water_peach ;;
-        2) start_jackfruit ;;
-        3) jump_kernel ;;
-        4) check_water_peach ;;
-        5) check_jackfruit ;;
-        6) mount_disk ;;
-        7) old_jackfruit ;;
-        8) solidify_hosts ;;
-        9) unsolidify_hosts ;;
-        10) skip_kernel_update ;;
-        11) format_disks ;;
-        12) clear_history ;;
+        1) install_water_peach ;;
+        2) start_water_peach_service ;;
+        3) install_jackfruit ;;
+        4) start_jackfruit_service ;;
+        5) jump_kernel ;;
+        6) check_water_peach ;;
+        7) check_jackfruit ;;
+        8) mount_disk ;;
+        9) old_jackfruit ;;
+        10) solidify_hosts ;;
+        11) unsolidify_hosts ;;
+        12) skip_kernel_update ;;
+        13) format_disks ;;
+        14) clear_history ;;
         q|Q) 
             echo -e "${RED}退出系统${NC}"
             exit 0
