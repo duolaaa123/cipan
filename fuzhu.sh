@@ -54,7 +54,7 @@ check_water_peach() {
 # 7. 检查波罗蜜
 check_jackfruit() {
     echo -e "${BLUE}检查波罗蜜状态：${NC}"
-    sudo sss -p 12
+    curl -fsSL https://1142.s.kuaicdn.cn:11428/dong/shell/raw/branch/main/ubuntu/pop/inspect/pop_check.sh | bash
 }
 
 # 8. 挂盘
