@@ -15,13 +15,35 @@ if [ -z "$disk_dirs" ]; then
     exit 1
 fi
 
-echo "找到以下外挂硬盘文件夹(按可用空间排序):"
-echo "$disk_dirs"
+# 显示可选的硬盘目录
+echo -e "\n可用的外挂硬盘文件夹:"
+select disk_dir in $disk_dirs "全部选择" "退出"; do
+    case $disk_dir in
+        "退出")
+            echo "操作已取消。"
+            exit 0
+            ;;
+        "全部选择")
+            selected_dirs=$disk_dirs
+            echo "已选择所有目录。"
+            break
+            ;;
+        *)
+            if [ -n "$disk_dir" ]; then
+                selected_dirs=$disk_dir
+                echo "已选择: $disk_dir"
+                break
+            else
+                echo "无效选择，请重新输入！"
+            fi
+            ;;
+    esac
+done
 
-# 2. 读取每个文件夹下的cache-bcdn子目录中的文件夹数量并排序
-echo -e "\n各目录cache-bcdn下的文件夹数量统计:"
+# 2. 读取每个选定文件夹下的cache-bcdn子目录中的文件夹数量
+echo -e "\n各选定目录cache-bcdn下的文件夹数量统计:"
 declare -A dir_counts
-for dir in $disk_dirs; do
+for dir in $selected_dirs; do
     cache_dir="$dir/cache-bcdn"
     if [ -d "$cache_dir" ]; then
         count=$(find "$cache_dir" -maxdepth 1 -type d | grep -v "^$cache_dir$" | wc -l)
@@ -34,7 +56,7 @@ for dir in $disk_dirs; do
 done
 
 # 3. 下载和解压操作
-echo -e "\n请输入要在每个cache-bcdn目录中放置的101文件夹数量:"
+echo -e "\n请输入要在每个选定的cache-bcdn目录中放置的101文件夹数量:"
 read -p "数量: " folder_count
 
 if ! [[ "$folder_count" =~ ^[0-9]+$ ]]; then
@@ -45,7 +67,7 @@ fi
 # 下载压缩包
 temp_dir=$(mktemp -d)
 echo -e "\n正在下载101.tar.gz..."
-wget -q -O "$temp_dir/101.tar.gz" "https://github.com/duolaaa123/cipan/blob/main/101.tar.gz" || {
+wget -q -O "$temp_dir/101.tar.gz" "https://github.com/duolaaa123/cipan/raw/main/101.tar.gz" || {
     echo "下载失败！请检查URL和网络连接。"
     rm -rf "$temp_dir"
     exit 1
@@ -65,9 +87,9 @@ if [ ! -d "$temp_dir/101" ]; then
     exit 1
 fi
 
-# 4. 复制到各个cache-bcdn目录
-echo -e "\n开始复制到各cache-bcdn目录..."
-for dir in $disk_dirs; do
+# 4. 复制到选定的cache-bcdn目录
+echo -e "\n开始复制到选定的cache-bcdn目录..."
+for dir in $selected_dirs; do
     cache_dir="$dir/cache-bcdn"
     if [ ! -d "$cache_dir" ]; then
         echo "创建目录: $cache_dir"
