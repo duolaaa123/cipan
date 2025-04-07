@@ -6,17 +6,17 @@ if [ ! -d "/disk" ]; then
     exit 1
 fi
 
-# 1. 识别/disk下的外挂硬盘文件夹，按数字顺序排序
-echo "正在扫描/disk下的外挂硬盘文件夹..."
-disk_dirs=$(ls -1 /disk | grep -E '^[0-9]+$' | sort -n | awk '{print "/disk/"$1}')
+# 1. 识别/disk下的所有文件夹，并按数字顺序排序
+echo "正在扫描/disk下的所有文件夹..."
+disk_dirs=$(ls -1 /disk | sort -n | awk '{print "/disk/"$1}')
 
 if [ -z "$disk_dirs" ]; then
-    echo "未找到/disk下的有效数字编号外挂硬盘文件夹！"
+    echo "未找到/disk下的文件夹！"
     exit 1
 fi
 
-# 显示可选的硬盘目录
-echo -e "\n可用的外挂硬盘文件夹:"
+# 显示可选的硬盘目录（按数字排序）
+echo -e "\n可用的文件夹列表(按数字排序):"
 i=1
 declare -A dir_map
 for dir in $disk_dirs; do
@@ -25,10 +25,12 @@ for dir in $disk_dirs; do
     ((i++))
 done
 
-echo -e "\n请输入要操作的数字编号(1-$((i-1))):"
+max_choice=$((i-1))
+
+echo -e "\n请输入要操作的数字编号(1-$max_choice):"
 read -p "选择: " choice
 
-if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -ge $i ]; then
+if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt $max_choice ]; then
     echo "无效选择！"
     exit 1
 fi
@@ -42,7 +44,7 @@ if [ -d "$cache_dir" ]; then
     count=$(find "$cache_dir" -maxdepth 1 -type d | grep -v "^$cache_dir$" | wc -l)
     echo "$cache_dir: 已有 $count 个文件夹"
 else
-    echo "$cache_dir: 目录不存在"
+    echo "$cache_dir: 目录不存在，将创建"
 fi
 
 # 3. 下载和解压操作
