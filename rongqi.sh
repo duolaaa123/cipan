@@ -15,14 +15,28 @@ if [ -z "$disk_dirs" ]; then
     exit 1
 fi
 
-# 显示可选的硬盘目录（按数字排序）
-echo -e "\n可用的文件夹列表(按数字排序):"
-i=1
+# 2. 先统计各目录cache-bcdn下的文件夹数量
+echo -e "\n正在统计各目录cache-bcdn下的文件夹数量..."
+declare -A dir_counts
 declare -A dir_map
+
+i=1
 for dir in $disk_dirs; do
-    echo "$i) $dir"
-    dir_map[$i]=$dir
+    cache_dir="$dir/cache-bcdn"
+    if [ -d "$cache_dir" ]; then
+        count=$(find "$cache_dir" -maxdepth 1 -type d | grep -v "^$cache_dir$" | wc -l)
+    else
+        count="目录不存在"
+    fi
+    dir_counts[$i]="$count"
+    dir_map[$i]="$dir"
     ((i++))
+done
+
+# 3. 显示可选的硬盘目录及文件夹数量统计
+echo -e "\n可用的文件夹列表(按数字排序): [显示cache-bcdn目录中的文件夹数量]"
+for ((j=1; j<i; j++)); do
+    echo "$j) ${dir_map[$j]} - cache-bcdn文件夹数量: ${dir_counts[$j]}"
 done
 
 max_choice=$((i-1))
@@ -38,16 +52,7 @@ fi
 selected_dir=${dir_map[$choice]}
 echo "已选择: $selected_dir"
 
-# 2. 检查cache-bcdn子目录
-cache_dir="$selected_dir/cache-bcdn"
-if [ -d "$cache_dir" ]; then
-    count=$(find "$cache_dir" -maxdepth 1 -type d | grep -v "^$cache_dir$" | wc -l)
-    echo "$cache_dir: 已有 $count 个文件夹"
-else
-    echo "$cache_dir: 目录不存在，将创建"
-fi
-
-# 3. 下载和解压操作
+# 4. 下载和解压操作
 echo -e "\n请输入要在该目录中放置的101文件夹数量:"
 read -p "数量: " folder_count
 
@@ -59,27 +64,31 @@ fi
 # 下载压缩包
 temp_dir=$(mktemp -d)
 echo -e "\n正在下载101.tar.gz..."
-wget -q -O "$temp_dir/101.tar.gz" "https://gitproxy.click/https://github.com/duolaaa123/cipan/raw/main/101.tar.gz" || {
+if ! wget -q -O "$temp_dir/101.tar.gz" "https://gitproxy.click/https://github.com/duolaaa123/cipan/raw/main/101.tar.gz"; then
     echo "下载失败！请检查URL和网络连接。"
-    rm -rf "$temp_dir"
-    exit 1
-}
-
-# 解压
-echo "正在解压..."
-tar -xzf "$temp_dir/101.tar.gz" -C "$temp_dir" || {
-    echo "解压失败！"
-    rm -rf "$temp_dir"
-    exit 1
-}
-
-if [ ! -d "$temp_dir/101" ]; then
-    echo "压缩包中未找到101文件夹！"
     rm -rf "$temp_dir"
     exit 1
 fi
 
-# 4. 复制到选定的cache-bcdn目录
+# 解压并验证内容
+echo "正在解压并验证内容..."
+if ! tar -xzf "$temp_dir/101.tar.gz" -C "$temp_dir"; then
+    echo "解压失败！"
+    rm -rf "$temp_dir"
+    exit 1
+fi
+
+# 检查解压后的101目录是否存在
+if [ ! -d "$temp_dir/101" ]; then
+    echo "错误：压缩包中未找到101文件夹！解压内容如下："
+    ls -l "$temp_dir"
+    echo "请检查压缩包内容是否符合预期。"
+    rm -rf "$temp_dir"
+    exit 1
+fi
+
+# 5. 复制到选定的cache-bcdn目录
+cache_dir="$selected_dir/cache-bcdn"
 echo -e "\n开始复制到 $cache_dir..."
 if [ ! -d "$cache_dir" ]; then
     echo "创建目录: $cache_dir"
@@ -98,9 +107,13 @@ for ((i=1; i<=folder_count; i++)); do
     fi
     
     echo "复制为 $new_name"
-    cp -r "$temp_dir/101" "$cache_dir/$new_name"
+    if ! cp -r "$temp_dir/101" "$cache_dir/$new_name"; then
+        echo "复制失败！请检查磁盘空间和权限。"
+        rm -rf "$temp_dir"
+        exit 1
+    fi
 done
 
 # 清理
 rm -rf "$temp_dir"
-echo -e "\n操作完成！"
+echo -e "\n操作成功完成！"
