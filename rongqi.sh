@@ -6,57 +6,47 @@ if [ ! -d "/disk" ]; then
     exit 1
 fi
 
-# 1. 识别/disk下的外挂硬盘文件夹，按可用容量排序
-echo "正在扫描/disk下的外挂硬盘文件夹并按可用容量排序..."
-disk_dirs=$(df -h | awk '/\/disk\/[^/]+$/{print $6}' | xargs -I{} sh -c 'echo {} $(df -B1 {} | awk "NR==2{print \$4}")' | sort -k2 -nr | awk '{print $1}')
+# 1. 识别/disk下的外挂硬盘文件夹，按数字顺序排序
+echo "正在扫描/disk下的外挂硬盘文件夹..."
+disk_dirs=$(ls -1 /disk | grep -E '^[0-9]+$' | sort -n | awk '{print "/disk/"$1}')
 
 if [ -z "$disk_dirs" ]; then
-    echo "未找到/disk下的有效外挂硬盘文件夹！"
+    echo "未找到/disk下的有效数字编号外挂硬盘文件夹！"
     exit 1
 fi
 
 # 显示可选的硬盘目录
 echo -e "\n可用的外挂硬盘文件夹:"
-select disk_dir in $disk_dirs "全部选择" "退出"; do
-    case $disk_dir in
-        "退出")
-            echo "操作已取消。"
-            exit 0
-            ;;
-        "全部选择")
-            selected_dirs=$disk_dirs
-            echo "已选择所有目录。"
-            break
-            ;;
-        *)
-            if [ -n "$disk_dir" ]; then
-                selected_dirs=$disk_dir
-                echo "已选择: $disk_dir"
-                break
-            else
-                echo "无效选择，请重新输入！"
-            fi
-            ;;
-    esac
+i=1
+declare -A dir_map
+for dir in $disk_dirs; do
+    echo "$i) $dir"
+    dir_map[$i]=$dir
+    ((i++))
 done
 
-# 2. 读取每个选定文件夹下的cache-bcdn子目录中的文件夹数量
-echo -e "\n各选定目录cache-bcdn下的文件夹数量统计:"
-declare -A dir_counts
-for dir in $selected_dirs; do
-    cache_dir="$dir/cache-bcdn"
-    if [ -d "$cache_dir" ]; then
-        count=$(find "$cache_dir" -maxdepth 1 -type d | grep -v "^$cache_dir$" | wc -l)
-        dir_counts["$dir"]=$count
-        echo "$dir/cache-bcdn: $count 个文件夹"
-    else
-        dir_counts["$dir"]=0
-        echo "$dir/cache-bcdn: 目录不存在"
-    fi
-done
+echo -e "\n请输入要操作的数字编号(1-$((i-1))):"
+read -p "选择: " choice
+
+if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -ge $i ]; then
+    echo "无效选择！"
+    exit 1
+fi
+
+selected_dir=${dir_map[$choice]}
+echo "已选择: $selected_dir"
+
+# 2. 检查cache-bcdn子目录
+cache_dir="$selected_dir/cache-bcdn"
+if [ -d "$cache_dir" ]; then
+    count=$(find "$cache_dir" -maxdepth 1 -type d | grep -v "^$cache_dir$" | wc -l)
+    echo "$cache_dir: 已有 $count 个文件夹"
+else
+    echo "$cache_dir: 目录不存在"
+fi
 
 # 3. 下载和解压操作
-echo -e "\n请输入要在每个选定的cache-bcdn目录中放置的101文件夹数量:"
+echo -e "\n请输入要在该目录中放置的101文件夹数量:"
 read -p "数量: " folder_count
 
 if ! [[ "$folder_count" =~ ^[0-9]+$ ]]; then
@@ -88,31 +78,25 @@ if [ ! -d "$temp_dir/101" ]; then
 fi
 
 # 4. 复制到选定的cache-bcdn目录
-echo -e "\n开始复制到选定的cache-bcdn目录..."
-for dir in $selected_dirs; do
-    cache_dir="$dir/cache-bcdn"
-    if [ ! -d "$cache_dir" ]; then
-        echo "创建目录: $cache_dir"
-        mkdir -p "$cache_dir"
+echo -e "\n开始复制到 $cache_dir..."
+if [ ! -d "$cache_dir" ]; then
+    echo "创建目录: $cache_dir"
+    mkdir -p "$cache_dir"
+fi
+
+for ((i=1; i<=folder_count; i++)); do
+    new_name="101"
+    if [ -d "$cache_dir/$new_name" ]; then
+        # 查找可用的编号
+        num=102
+        while [ -d "$cache_dir/$new_name" ]; do
+            new_name="$num"
+            ((num++))
+        done
     fi
     
-    echo -e "\n处理 $cache_dir:"
-    existing_count=${dir_counts["$dir"]}
-    
-    for ((i=1; i<=folder_count; i++)); do
-        new_name="101"
-        if [ -d "$cache_dir/$new_name" ]; then
-            # 查找可用的编号
-            num=102
-            while [ -d "$cache_dir/$new_name" ]; do
-                new_name="$num"
-                ((num++))
-            done
-        fi
-        
-        echo "复制为 $new_name"
-        cp -r "$temp_dir/101" "$cache_dir/$new_name"
-    done
+    echo "复制为 $new_name"
+    cp -r "$temp_dir/101" "$cache_dir/$new_name"
 done
 
 # 清理
