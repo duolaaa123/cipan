@@ -64,7 +64,7 @@ fi
 # 下载压缩包
 temp_dir=$(mktemp -d)
 echo -e "\n正在下载101.tar.gz..."
-if ! wget -q -O "$temp_dir/101.tar.gz" "https://gitproxy.click/https://github.com/duolaaa123/cipan/raw/main/101.tar.gz"; then
+if ! wget -q -O "$temp_dir/101.tar.gz" "https://gitproxy.click/https://github.com/duolaaa123/cipan/blob/f1ce990b79847de833f4436fa9b47985e0f325e3/101.tar.gz"; then
     echo "下载失败！请检查URL和网络连接。"
     rm -rf "$temp_dir"
     exit 1
