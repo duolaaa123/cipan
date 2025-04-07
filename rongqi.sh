@@ -61,10 +61,24 @@ if ! [[ "$folder_count" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
-# 下载压缩包
+# 下载压缩包（带重试机制）
 temp_dir=$(mktemp -d)
+download_url="https://gitproxy.click/https://github.com/duolaaa123/cipan/blob/f1ce990b79847de833f4436fa9b47985e0f325e3/101.tar.gz"
 echo -e "\n正在下载101.tar.gz..."
-if ! wget -q -O "$temp_dir/101.tar.gz" "https://gitproxy.click/https://github.com/duolaaa123/cipan/blob/f1ce990b79847de833f4436fa9b47985e0f325e3/101.tar.gz"; then
+
+download_success=false
+for attempt in {1..2}; do
+    echo "尝试 $attempt/2..."
+    if wget --show-progress -q -O "$temp_dir/101.tar.gz" "$download_url"; then
+        download_success=true
+        break
+    else
+        echo "下载失败，等待3秒后重试..."
+        sleep 3
+    fi
+done
+
+if [ "$download_success" = false ]; then
     echo "下载失败！请检查URL和网络连接。"
     rm -rf "$temp_dir"
     exit 1
