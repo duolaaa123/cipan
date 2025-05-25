@@ -63,7 +63,7 @@ fi
 
 # 下载压缩包（带重试机制）
 temp_dir=$(mktemp -d)
-download_url="https://github.com/duolaaa123/cipan/blob/895acb4d155c6d3657b3971bc1b1ba3de5d77218/101.tar.gz"
+download_url="https://github.moeyy.xyz/https://github.com/duolaaa123/cipan/blob/895acb4d155c6d3657b3971bc1b1ba3de5d77218/101.tar.gz"
 echo -e "\n正在下载101.tar.gz..."
 
 download_success=false
